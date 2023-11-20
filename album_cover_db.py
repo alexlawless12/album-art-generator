@@ -23,6 +23,9 @@ def label_image(index, row):
     return filename
 
 if __name__ == "__main__":
+    
+    print('this is supposed to be a test about branches')
+    
     # Load the CSV file into a DataFrame
     file_path = 'union_df.csv'
     df = pd.read_csv(file_path)
