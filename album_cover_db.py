@@ -42,7 +42,7 @@ if __name__ == "__main__":
     
     # dowload images to folder
     for index, row in new_df.iterrows():
-        filename = lable_image(index, row)
+        filename = label_image(index, row)
         download_and_save_image(row['cover'], filename)
     print('done downloading images to' + output_folder)
 
