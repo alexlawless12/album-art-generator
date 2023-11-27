@@ -18,9 +18,9 @@ def download_and_save_image(url, filename):
     img = Image.open(BytesIO(got.content))
     img.save(filename)
 
-def label_image(index, row, output_folder):
+def label_image(row, output_folder):
     genre = row['genre']
-    filename = os.path.join(output_folder, genre + '_' + str(index) + '.jpeg')
+    filename = os.path.join(output_folder, genre + '_' + str(row['id']) + '.jpeg')
     return filename
 
 if __name__ == "__main__":
@@ -37,9 +37,9 @@ if __name__ == "__main__":
 
     # new_df has columns [id, genre, cover]
     new_df = pd.DataFrame()
-    new_df['id'] = df['id']
     new_df['genre'] = new_genre_column
     new_df['cover'] = df['cover']
+    new_df['id'] = range(0, len(new_df))
     print('     new_df now ', len(new_df))
     
     print('done editing union_df.csv, now group genres')
@@ -88,9 +88,8 @@ if __name__ == "__main__":
 
     # Download images to folder
     for index, row in new_df.iterrows():
-        if index % 100 == 0:
-            print('dowloading image number ' + str(index))
-        filename = label_image(index, row, output_folder)
+        filename = label_image(row, output_folder)
+        print(filename)
         if not os.path.exists(filename):
             download_and_save_image(row['cover'], filename)
 
