@@ -39,6 +39,12 @@ if __name__ == "__main__":
     new_df = pd.DataFrame()
     new_df['genre'] = new_genre_column
     new_df['cover'] = df['cover']
+    new_df['spotify_tag'] = df['id'] # id to refrence back to union_df.csv if needed
+    
+    # drop cover repeats
+    new_df.drop_duplicates(subset=['cover'], inplace=True)
+    
+    # add readable integer id
     new_df['id'] = range(0, len(new_df))
     print('     new_df now ', len(new_df))
     
@@ -81,12 +87,11 @@ if __name__ == "__main__":
     new_df.to_csv('genre_df.csv', index=False)
     print('Done updating genres, saved in genre_df.csv')
 
-
     # Set output folder path
     output_folder = './album_covers'
     os.makedirs(output_folder, exist_ok=True)
 
-    # Download images to folder
+    # Download images to folder (300 px x 300 px)
     for index, row in new_df.iterrows():
         filename = label_image(row, output_folder)
         print(filename)
