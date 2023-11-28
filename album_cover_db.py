@@ -89,8 +89,6 @@ if __name__ == "__main__":
     print('Done updating genres, saved in genre_df.csv')
 
     # Set output folder path
-    #output_folder = './album_covers'
-    #os.makedirs(output_folder, exist_ok=True)
     for genre in genre_buckets.keys():
         newFolder = './' + genre
         os.makedirs(newFolder, exist_ok=True)
