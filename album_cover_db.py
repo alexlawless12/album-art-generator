@@ -18,9 +18,10 @@ def download_and_save_image(url, filename):
     img = Image.open(BytesIO(got.content))
     img.save(filename)
 
-def label_image(row, output_folder):
+def label_image(row):
     genre = row['genre']
-    filename = os.path.join(output_folder, genre + '_' + str(row['id']) + '.jpeg')
+    output_folder = './' + genre
+    filename = os.path.join(output_folder, str(row['id']) + '.jpeg')
     return filename
 
 if __name__ == "__main__":
@@ -64,7 +65,7 @@ if __name__ == "__main__":
         'country': ['country', 'countryrock'],
         'r&b': ['r&b', 'soul', 'neosoul', 'quietstorm', 'contemporaryr&b', 'alternativer&b'],
         'indie': ['indie', 'indierock', 'indiepop', 'indiepoptimism', 'indier&b', 'indiefolk', 'indieelectronica', 'singersongwriter'],
-        'reggae' : ['reggae'],
+        'reggae' : ['reggae']
     }
 
     # Default bucket for genres not in any specified bucket
@@ -88,14 +89,18 @@ if __name__ == "__main__":
     print('Done updating genres, saved in genre_df.csv')
 
     # Set output folder path
-    output_folder = './album_covers'
-    os.makedirs(output_folder, exist_ok=True)
+    #output_folder = './album_covers'
+    #os.makedirs(output_folder, exist_ok=True)
+    for genre in genre_buckets.keys():
+        newFolder = './' + genre
+        os.makedirs(newFolder, exist_ok=True)
+    os.makedirs('./other', exist_ok=True)
 
     # Download images to folder (300 px x 300 px)
     for index, row in new_df.iterrows():
-        filename = label_image(row, output_folder)
+        filename = label_image(row)
         print(filename)
         if not os.path.exists(filename):
             download_and_save_image(row['cover'], filename)
 
-    print('Done downloading images to ' + output_folder)
+    print('Done downloading images to folders')
