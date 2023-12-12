@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Album Cover Genre Prediction</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Album Cover Genre Prediction</h1>
+
+  <input type="file" id="uploadInput" accept="image/*">
+  <button onclick="predict()">Predict</button>
+
+  <div id="output"></div>
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs" crossorigin="anonymous"></script>
+
+  <script>
+    // Resize and preprocess the image
+    function preprocessImage(imageElement) {
+      const imageTensor = tf.image.rgbToGrayscale(tf.browser.fromPixels(imageElement))
+        .resizeBilinear([128, 128]) // Resize to the input size expected by your model
+        .toFloat()
+        .div(tf.scalar(255.0))
+        .expandDims();
+      return imageTensor;
+    }
+    //   const imageTensor = tf.browser.fromPixels(imageElement)
+    //     .resizeBilinear([128, 128]) // Resize to the input size expected by your model
+    //     .toFloat()
+    //     .div(tf.scalar(255.0))
+    //     .expandDims();
+    //   return imageTensor;
+    // }
+
+    function capitalizeFirstLetter(string) {
+      return string.replace(/\b\w/g, (match) => match.toUpperCase());
+    }
+
+    // Load the pre-trained model
+    async function loadModel() {
+      const model = await tf.loadLayersModel('./real_model/model.json');
+      return model;
+    }
+
+    async function loadAlbumLabelMap() {
+      const response = await fetch('./album_label_map.csv');
+      const csvData = await response.text();
+      const lines = csvData.split('\n').map(line => line.split(','));
+      console.log(lines)
+
+      const album_label_map = {};
+      for (let i = 1; i < lines.length; i++) {
+        const [label_name, label] = lines[i];
+        album_label_map[label] = label_name;
+      }
+
+      return album_label_map;
+    }
+
+    // Make a prediction
+    async function predict() {
+      const fileInput = document.getElementById('uploadInput');
+      const outputDiv = document.getElementById('output');
+      const album_label_map = await loadAlbumLabelMap();
+
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select an image file.');
+        return;
+      }
+
+      const image = new Image();
+      image.src = URL.createObjectURL(file);
+
+      image.onload = async function () {
+        try {
+          // Preprocess the image
+          console.log('Preprocessing the image...');
+          const inputTensor = preprocessImage(image);
+          console.log('Image preprocessed.');
+
+          // Display the image
+          const originalImage = image.cloneNode(); // Create a clone to avoid modifying the original image
+          originalImage.width = 128;
+          originalImage.height = 128;
+
+          document.body.appendChild(originalImage);
+
+          // Load the pre-trained model
+          console.log('Loading the model...');
+          const model = await loadModel();
+          console.log('Model loaded successfully.');
+
+          // Make a prediction
+          console.log('Making a prediction...');
+          const predictions = tf.tidy(() => model.predict(inputTensor));
+
+          // Get the predicted label (index with the highest probability)
+          const predictedLabelIndex = predictions.argMax(1).dataSync()[0].toString(); // Convert to string
+
+          // Map the numeric label to human-readable label name
+          const predictedLabel = capitalizeFirstLetter(album_label_map[predictedLabelIndex]);
+
+          console.log('Prediction made successfully.');
+
+          // Display the predicted genre
+          outputDiv.innerHTML = `Predicted Genre: ${predictedLabel}`;
+
+        } catch (error) {
+          console.error('Error during prediction:', error);
+
+        } finally {
+          // Dispose of the tensors to free up memory
+          tf.dispose([inputTensor, predictions]);
+        }
+      };
+    }
+  </script>
+
+</body>
+
+</html>
