@@ -26,21 +26,22 @@
 
   <script>
     // Resize and preprocess the image
-    function preprocessImage(imageElement) {
-      const imageTensor = tf.image.rgbToGrayscale(tf.browser.fromPixels(imageElement))
-        .resizeBilinear([128, 128]) // Resize to the input size expected by your model
-        .toFloat()
-        .div(tf.scalar(255.0))
-        .expandDims();
-      return imageTensor;
-    }
-    //   const imageTensor = tf.browser.fromPixels(imageElement)
+    // function preprocessImage(imageElement) {
+    //   const imageTensor = tf.image.rgbToGrayscale(tf.browser.fromPixels(imageElement))
     //     .resizeBilinear([128, 128]) // Resize to the input size expected by your model
     //     .toFloat()
     //     .div(tf.scalar(255.0))
     //     .expandDims();
     //   return imageTensor;
     // }
+    function preprocessImage(imageElement) {
+      const imageTensor = tf.browser.fromPixels(imageElement)
+        .resizeBilinear([128, 128]) // Resize to the input size expected by your model
+        .toFloat()
+        .div(tf.scalar(255.0))
+        .expandDims();
+      return imageTensor;
+    }
 
     function capitalizeFirstLetter(string) {
       return string.replace(/\b\w/g, (match) => match.toUpperCase());
@@ -48,7 +49,7 @@
 
     // Load the pre-trained model
     async function loadModel() {
-      const model = await tf.loadLayersModel('./real_model/model.json');
+      const model = await tf.loadLayersModel('./color_model/model.json');
       return model;
     }
 
